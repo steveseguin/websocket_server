@@ -7,7 +7,7 @@ This can be used with a number of apps provided by Steve Seguin, including capti
 Due to the simplicity and generic nature of this app, it is suitable really only for personal/private use, as published data is broadcasted to everyone connected.
 
 
-## INSTALLATION
+## Installation
 ```
 sudo apt-get update
 sudo apt-get upgrade
@@ -19,6 +19,10 @@ sudo npm install fs
 sudo add-apt-repository ppa:certbot/certbot  
 sudo apt-get install certbot -y
 sudo certbot certonly // register your domain
+```
+
+## Run
+```
 sudo nodejs server.js // port 443 needs to be open. THIS STARTS THE SERVER
 ```
 
