@@ -1,4 +1,4 @@
-This is a basic web-socket server, similiar to that provided by piesocket.com. It accepts messages and broadcasts them to everyone else connected.
+This is a basic web-socket server, similar to that provided by piesocket.com. It accepts messages and broadcasts them to everyone else connected.
 
 ## Purpose
 
