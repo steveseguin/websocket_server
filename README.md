@@ -25,7 +25,7 @@ sudo nodejs server.js // port 443 needs to be open. THIS STARTS THE SERVER
 ```
 
 ## If using with OBS.Ninja
-If using this with a ninja deploy, you'll also need to deploy ninja and update the index.html of the ninja installation. You need to enable 'pie'-mode and to set the wss server address to whatever you setup, such as with:
+If using this with a ninja deploy, you'll also need to deploy ninja v17.3 or newer, and then update the index.html of the ninja installation with the connection details. You'll need to enable 'pie'-mode and to set the wss server address to whatever you setup, such as with:
 ```
 session.wss = "wss://wss.contribute.cam:443";
 session.pie = true;
@@ -35,3 +35,5 @@ The reason for calling it pie-mode is that you can alternatively use the managed
 `https://obs.ninja/?pie=YOURAPIKEYHERE`
 
 This will automatically select a websocket server hosted by pie-socket, and use your API key to host handshake communication. Pie-socket is not affliated with me at all, but they have a free-tier of service that is more than enough for personal/private use.
+
+Pie-mode and this websocket service is only compatible with version 17.3 or newer of ninja.
