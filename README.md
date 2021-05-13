@@ -29,5 +29,5 @@ sudo nodejs server.js // port 443 needs to be open. THIS STARTS THE SERVER
 Finally, if using this with a ninja deploy, update index.html of the ninja installation to enable pie-mode and to set the wss server address, such as with:
 ```
 session.wss = "wss://wss.contribute.cam:443";
-session.pie=true;
+session.pie = true;
 ```
