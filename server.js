@@ -37,7 +37,7 @@ websocketServer.on('connection', (webSocketClient) => {
     webSocketClient.on('message', (message) => {
             websocketServer.clients.forEach( client => {
                     if (webSocketClient!=client){
-                        client.send(message);
+                        client.send(message.toString());
                     }
             });
     });
