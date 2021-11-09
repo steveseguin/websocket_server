@@ -17,7 +17,7 @@
 //
 //// Finally, if using this with a ninja deploy, update index.html of the ninja installation as needed, such as with:
 //  session.wss = "wss://wss.contribute.cam:443";
-//	session.customWSS = true;  #  Please refer to the vdo.ninja instructions for exact details on settings; this is just a demo.
+//  session.customWSS = true;  #  Please refer to the vdo.ninja instructions for exact details on settings; this is just a demo.
 /////////////////////////
 
 "use strict";
