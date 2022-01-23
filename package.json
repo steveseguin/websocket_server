@@ -1,0 +1,10 @@
+{
+    "scripts": {
+      "start": "node server"
+    },
+    "dependencies": {
+      "polka": "0.5.x",
+      "sirv": "2.0.x",
+      "ws": "8.4.x"
+    }
+  }
