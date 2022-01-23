@@ -1,0 +1,3 @@
+[submodule "vdo.ninja"]
+	path = vdo.ninja
+	url = https://github.com/steveseguin/vdo.ninja.git
