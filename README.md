@@ -66,4 +66,8 @@ You can also just specify the new WSS URL as a URL parameter, such as:
 https://vdo.ninja?wss=wss://yourdomain.com
 ```
 
+## Disclaimer
+
+No guarentee is made on security, privacy, support, or reliability of these scripts; nor anything else for that matter. You're on your own if you choose to go this path.
+
 Good luck!
