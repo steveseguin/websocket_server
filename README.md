@@ -9,7 +9,7 @@ The basic websocket server, `server.js`, can be used with a number of apps provi
 
 Due to the simplicity and generic nature of its basic fan-out design, it's really only suitable for personal or private use, as published data is broadcasted to everyone connected. 
 
-### VDO.NInja optimized version server
+### VDO.Ninja optimized version server
 
 VDO.Ninja is intentionally designed to work with a basic websocket server, due to a core tenant of the VDO.Ninja's design philosophy is to be as serverless as possible. This develoment mindset allows VDO.Ninja to not only have a low-cost to operate, but also allows it to work over public blockchain networks, RabbitMQ, IRC chat rooms, and probably even Twitter. It's a good idea to use a secure password in such cases though, to ensure message encryption over public channels.
 
