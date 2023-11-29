@@ -4,7 +4,8 @@
 //
 // This is VDO.Ninja-specific handshake server implementation
 // It has better routing isolation and performance than a generic fan-out implementation
-// Use at your own risk, as it still may contain bugs or security vunlerabilities
+//
+// >> Use at your own risk, as it still may contain bugs or security vunlerabilities <<
 //
 ///// INSTALLATION
 // sudo apt-get update
