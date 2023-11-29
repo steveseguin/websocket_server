@@ -17,7 +17,7 @@ That said, it's fairly easy to optimize the message routing to get better perfor
 
 ### Alternative options
 
-You can use services like piesocket.com or Cloudflare workers, instead of self-hosting a websocket server as well. Just pointing that out, as self-hosting servers is a responsibility and carries a cost..
+You can use services like piesocket.com or Cloudflare workers, instead of self-hosting a websocket server as well. Just pointing that out, as self-hosting servers is a responsibility..
 
 ## Installation
 ```
