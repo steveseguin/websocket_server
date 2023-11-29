@@ -15,6 +15,10 @@ VDO.Ninja is intentionally designed to work with a basic websocket server, due t
 
 That said, it's fairly easy to optimize the message routing to get better performance and security when using VDO.Ninja.  To demonstrate this, I've also included in this repository an optimized version of the websocket server (`vdoninja.js`), specifically designed to fill the role of a VDO.Ninja handshake server. Either the basic or this optimized version would work with VDO.Ninja as a handshake server, however the optimized version can handle more clients and has better routing isolation.
 
+### Alternative options
+
+You can use services like piesocket.com or Cloudflare workers, instead of self-hosting a websocket server as well. Just pointing that out, as self-hosting servers is a responsibility and carries a cost..
+
 ## Installation
 ```
 sudo apt-get update
@@ -24,17 +28,25 @@ sudo apt-get install npm -y
 sudo npm install express
 sudo npm install ws
 sudo npm install fs
+```
+
+You very likely will require SSL, either using something like Cloudflare SSL, or with a self-hosted SSL certificate. Certbot is a free way to get SSL certificates that you need to renewal every 90-days, and the setup for that is as follows:
+```
 sudo add-apt-repository ppa:certbot/certbot  
 sudo apt-get install certbot -y
 sudo certbot certonly // register your domain
 ```
+I'm not going to detail the SSL setup process much, but once you have your certificate, you can update the server script to point to your certificate. You can also disable SSL in the script, and rely on Cloudflare's Flexible SSL instead. Pros and cons.
+
+As well, you will probably need a domain name, if you want to use SSL, so perhaps consider a cloud host that offers a server hostname or be prepared to spend a few dollars on a domain name. (namescheap.com has them for as low as $2)
+
+In the case of an offline deployment, you may need self-signed certicates if you have no Internet access, but that topic is outside the scope of this guide.
 
 ## To run the basic server manually
 ```
 sudo nodejs server.js // port 443 needs to be open. THIS STARTS THE SERVER
 ```
-or with
-
+But you'll probably want to create a service and have the script auto start on system load or restart on a crash.
 
 ## If using with VDO.Ninja
 
@@ -42,7 +54,7 @@ To run the VDO.Ninja optimized version manually,
 ```
 sudo nodejs vdoninja.js // port 443 needs to be open. THIS STARTS THE SERVER
 ```
-Whether you use the optimized version or not, if using this with a self-hosted version of VDO.Ninja, you'll need to update the index.html of your VDO.Ninja installation with the connection details.
+Whether you use the optimized version or not, if using this with a self-hosted version of VDO.Ninja, you'll need to update the `index.html` of your VDO.Ninja installation with the WSS connection details.
 
 Specially, you'll need to enable the `customWSS` mode and set the wss server address to whatever you setup, such as with:
 ```
@@ -54,3 +66,4 @@ You can also just specify the new WSS URL as a URL parameter, such as:
 https://vdo.ninja?wss=wss://yourdomain.com
 ```
 
+Good luck!
