@@ -5,7 +5,7 @@ This repository includes a couple variations of websocket servers written in Nod
 The included websocket server scripts are designed to allow self-hosting of some of the apps and services provided by Steve Seguin, including caption.ninja, vdo.ninja, chat.overlay.ninja, and more.
 
 ### basic server
-The basic websocket server `server.js`, can be used with a number of apps provided by Steve Seguin, including vdo.ninja, caption.ninja, chat.overlay.ninja, and more.
+The basic websocket server, `server.js`, can be used with a number of apps provided by Steve Seguin, including vdo.ninja, caption.ninja, chat.overlay.ninja, and more.
 
 Due to the simplicity and generic nature of its basic fan-out design, it's really only suitable for personal or private use, as published data is broadcasted to everyone connected. 
 
