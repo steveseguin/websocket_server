@@ -17,7 +17,7 @@
 // sudo add-apt-repository ppa:certbot/certbot  
 // sudo apt-get install certbot -y
 // sudo certbot certonly // register your domain
-// sudo nodejs server.js // port 443 needs to be open. THIS STARTS THE SERVER
+// sudo nodejs vdoninja.js // port 443 needs to be open. THIS STARTS THE SERVER (or create a service instead)
 //
 //// Finally, if using this with a ninja deploy, update index.html of the ninja installation as needed, such as with:
 //  session.wss = "wss://wss.contribute.cam:443";
