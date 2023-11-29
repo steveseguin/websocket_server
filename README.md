@@ -30,17 +30,17 @@ sudo npm install ws
 sudo npm install fs
 ```
 
-You very likely will require SSL, either using something like Cloudflare SSL, or with a self-hosted SSL certificate. Certbot is a free way to get SSL certificates that you need to renewal every 90-days, and the setup for that is as follows:
+You will very likely also require SSL, so either use something like Cloudflare SSL, or grab a self-hosted SSL certificate. Certbot is a free way to get SSL certificates that you need to renewal every 90-days, and the setup for that is as follows:
 ```
 sudo add-apt-repository ppa:certbot/certbot  
 sudo apt-get install certbot -y
 sudo certbot certonly // register your domain
 ```
-I'm not going to detail the SSL setup process much, but once you have your certificate, you can update the server script to point to your certificate. You can also disable SSL in the script, and rely on Cloudflare's Flexible SSL instead. Pros and cons.
+I'm not going to detail the SSL setup process much, but once you have your certificate, you can update the server script to point to your certificate.
 
-As well, you will probably need a domain name, if you want to use SSL, so perhaps consider a cloud host that offers a server hostname or be prepared to spend a few dollars on a domain name. (namescheap.com has them for as low as $2)
+As well, you will probably need a domain name in most cases, so perhaps consider a cloud host that offers a server hostname or be prepared to spend a few dollars on a domain name. (namescheap.com has them for as low as $2)
 
-In the case of an offline deployment, you may need self-signed certicates if you have no Internet access, but that topic is outside the scope of this guide.
+In the case of an offline deployment, you may need self-signed certicates, but that topic is outside the scope of this guide.
 
 ## To run the basic server manually
 ```
