@@ -13,7 +13,7 @@ Due to the simplicity and generic nature of its basic fan-out design, it's reall
 
 VDO.Ninja is intentionally designed to work with a basic websocket server, due to a core tenant of the VDO.Ninja's design philosophy being: "be as serverless as possible". This develoment mindset allows VDO.Ninja to not only have a low-cost to operate, but also allows it to work over public blockchain networks, RabbitMQ, IRC chat rooms, and probably even Twitter. It's a good idea to use a secure password in such cases though, to ensure message encryption over public channels.
 
-That said, it's fairly easy to optimize the message routing to get better performance and security when using VDO.Ninja.  To demonstrate this, I've also included in this repository an optimized version of the websocket server (`vdoninja.js`), specifically designed to fill the role of a VDO.Ninja handshake server. Either the basic or this optimized version would work with VDO.Ninja as a handshake server, however the optimized version can handle more clients and has better routing isolation.
+That said, it's fairly easy to optimize the message routing to get better performance and security when using VDO.Ninja.  To demonstrate this, I've also included in this repository an optimized version of the websocket server (`vdoninja.js`), specifically designed to fill the role of a VDO.Ninja handshake server. Either the basic or this optimized version would work as a VDO.Ninja handshake server, however the optimized version can handle more clients and has better routing isolation.
 
 ### Alternative options
 
