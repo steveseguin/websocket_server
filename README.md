@@ -66,6 +66,15 @@ You can also just specify the new WSS URL as a URL parameter, such as:
 https://vdo.ninja?wss=wss://yourdomain.com
 ```
 
+## Deploy to AWS
+Use [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) to deploy.
+Attempts have been made to keep resources limited to the free tier, but some AWS costs may still be incurred especially with 
+heavy or unexpected usage.
+
+Install node_modules in each lambda function (onconnect, ondisconnect, sendmessage) with `npm install`.
+
+Use `sam deploy -g` and pass in a valid domain name for the WSS server.  This will create a custom domain and certificate that will need to be DNS validated.
+
 ## Disclaimer
 
 No guarentee is made on security, privacy, support, or reliability of these scripts; nor anything else for that matter. You're on your own if you choose to go this path.
