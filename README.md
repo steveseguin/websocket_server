@@ -7,13 +7,21 @@ The included websocket server scripts are designed to allow self-hosting of some
 ### basic server
 The basic websocket server, `server.js`, can be used with a number of apps provided by Steve Seguin, including vdo.ninja, caption.ninja, chat.overlay.ninja, and more.
 
-Due to the simplicity and generic nature of its basic fan-out design, it's really only suitable for personal or private use, as published data is broadcasted to everyone connected. 
+Due to the simplicity and generic nature of its basic fan-out design, it's really only suitable for personal or private use, as published data is broadcasted to everyone connected.
 
 ### VDO.Ninja optimized version server
 
-VDO.Ninja is intentionally designed to work with a basic websocket server, due to a core tenant of the VDO.Ninja's design philosophy being: "be as serverless as possible". This develoment mindset allows VDO.Ninja to not only have a low-cost to operate, but also allows it to work over public blockchain networks, RabbitMQ, IRC chat rooms, and probably even Twitter. It's a good idea to use a secure password in such cases though, to ensure message encryption over public channels.
+VDO.Ninja is intentionally designed to work with a basic websocket server, due to a core tenant of the VDO.Ninja's design philosophy being: "be as serverless as possible". This develoment mindset allows VDO.Ninja to not only have a low-cost to operate, but also allows it to work over public blockchain networks, mesh-networks, RabbitMQ, IRC chat rooms, and probably even Twitter. It's a good idea to use a secure password in such cases though, to ensure message encryption over public channels.
 
 That said, it's fairly easy to optimize the message routing to get better performance and security when using VDO.Ninja.  To demonstrate this, I've also included in this repository an optimized version of the websocket server (`vdoninja.js`), specifically designed to fill the role of a VDO.Ninja handshake server. Either the basic or this optimized version would work as a VDO.Ninja handshake server, however the optimized version can handle more clients and has better routing isolation.
+
+### Offline use, when Internet isn't available
+
+There's a version of VDO.Ninja handshake server located here, https://github.com/steveseguin/offline_deployment/, which combines the websocket (handshake) server with a Node.js-based webserver. It adds to the complexity by also focusing on being Dockerfile friendly, as well as being offline-focused, however it would work for an online option also.
+
+### Dockers
+
+This repository isn't focused on offering a Docker specifically, however https://github.com/steveseguin/offline_deployment/ contains one, as well as there is a community Docker for VDO.Ninja forked over at https://github.com/steveseguin/docker-vdon/.
 
 ### Alternative options
 
