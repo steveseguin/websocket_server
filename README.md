@@ -36,6 +36,7 @@ sudo apt-get install npm -y
 sudo npm install express
 sudo npm install ws
 sudo npm install fs
+sudo npm install cors
 ```
 
 You will very likely also require SSL, so either use something like Cloudflare SSL, or grab a self-hosted SSL certificate. Certbot is a free way to get SSL certificates that you need to renewal every 90-days, and the setup for that is as follows:
