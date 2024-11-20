@@ -51,6 +51,8 @@ As well, you will probably need a domain name in most cases, so perhaps consider
 
 In the case of an offline deployment, you may need self-signed certicates, but that topic is outside the scope of this guide.
 
+(Oh, also, I've added support for `npm install`, if you want a quick way to install the vdoninja.js script that way.)
+
 ## To run the basic server manually
 ```
 sudo nodejs server.js // port 443 needs to be open. THIS STARTS THE SERVER
