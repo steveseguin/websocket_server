@@ -1,0 +1,15 @@
+{
+  "name": "vdo-ninja-server",
+  "version": "1.0.0",
+  "description": "VDO.Ninja WebSocket handshake server",
+  "main": "vdoninja.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ws": "^8.2.3",
+    "fs": "0.0.1-security",
+    "cors": "^2.8.5"
+  },
+  "scripts": {
+    "start": "node vdoninja.js"
+  }
+}
