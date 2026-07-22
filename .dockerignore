@@ -1,0 +1,5 @@
+.git
+.github
+node_modules
+*.md
+install_vdoninja_wss.sh
