@@ -27,21 +27,28 @@
 
 "use strict";
 var fs = require("fs");
-var https = require("https");
 var express = require("express");
 var app = express();
 var WebSocket = require("ws");
 var cors = require('cors');
 
-const key = fs.readFileSync("/etc/letsencrypt/live/debug.vdo.ninja/privkey.pem"); /// UPDATE THIS PATH
-const cert = fs.readFileSync("/etc/letsencrypt/live/debug.vdo.ninja/fullchain.pem"); /// UPDATE THIS PATH
-
-var server = https.createServer({ key, cert }, app);
+// TLS is optional: set SSL_KEY_PATH/SSL_CERT_PATH to serve wss directly,
+// or run plain http behind a TLS-terminating ingress (e.g. Traefik).
+var server;
+if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
+  const key = fs.readFileSync(process.env.SSL_KEY_PATH);
+  const cert = fs.readFileSync(process.env.SSL_CERT_PATH);
+  server = require("https").createServer({ key, cert }, app);
+} else {
+  server = require("http").createServer(app);
+}
 var websocketServer = new WebSocket.Server({ server });
 
 app.use(cors({
   origin: '*'
 }));
+
+app.get('/health', (req, res) => res.status(200).send('ok'));
 
 websocketServer.on('connection', (webSocketClient) => {
   var room = false;
@@ -104,4 +111,5 @@ websocketServer.on('connection', (webSocketClient) => {
 
   webSocketClient.on('close', function(reasonCode, description) {});
 });
-server.listen(443, () => { console.log(`Server started on port 443`) });
+var port = parseInt(process.env.PORT || "443", 10);
+server.listen(port, () => { console.log(`Server started on port ${port}`) });
