@@ -10,7 +10,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const { WebSocketServer, WebSocket } = require('ws');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 function createServer() {
     const certPath = process.env.SERVER_CERT || process.env.CERT_PATH; // "/etc/letsencrypt/live/wss.yourdomain.com/fullchain.pem";
@@ -113,7 +113,7 @@ function notifyRoom(roomid, payload, skip) {
 }
 
 wss.on('connection', ws => {
-    const uuid = uuidv4();
+    const uuid = randomUUID();
     clients.set(uuid, ws);
     ws.on('close', () => cleanupClient(uuid));
     ws.on('error', () => cleanupClient(uuid));
@@ -124,11 +124,13 @@ wss.on('connection', ws => {
         } catch (error) {
             return;
         }
+        if (!data || typeof data !== 'object' || Array.isArray(data)) return;
         if (!data.request) {
             if (!data.UUID) return;
             const target = clients.get(data.UUID);
             if (!target) return;
             data.UUID = uuid;
+            delete data.from;
             safeSend(target, JSON.stringify(data));
             return;
         }
@@ -160,6 +162,10 @@ wss.on('connection', ws => {
             case 'seed': {
                 const streamID = readId(data.streamID);
                 if (!streamID) return;
+                if (streamIDs.has(uuid) && streamIDs.get(uuid) !== streamID) {
+                    safeSend(requester, JSON.stringify({ request: 'alert', message: 'Stream ID cannot change on an existing connection.' }));
+                    return;
+                }
                 if (streams.has(streamID)) {
                     const existing = streams.get(streamID);
                     if (existing !== uuid) {

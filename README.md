@@ -1,139 +1,160 @@
-This repository includes a couple variations of websocket servers written in Node.js.
+# WebSocket servers for VDO.Ninja and related apps
 
-## Purpose
+These Node.js examples provide **signaling**: messages that help clients find each other and negotiate a connection. They do not host the VDO.Ninja website or provide a TURN media relay.
 
-The included websocket server scripts are designed to allow self-hosting of some of the apps and services provided by Steve Seguin, including caption.ninja, vdo.ninja, chat.overlay.ninja, and more.
+**For a complete local/offline installation, start with [offline_deployment](https://github.com/steveseguin/offline_deployment).** Its main guide uses a normal Linux installation, a local website and HTTPS/WSS on one port. Docker is optional. It covers [creating and installing certificates](https://github.com/steveseguin/offline_deployment/blob/main/docs/certificates.md), [troubleshooting](https://github.com/steveseguin/offline_deployment/blob/main/docs/troubleshooting.md), and [what has actually been tested](https://github.com/steveseguin/offline_deployment/blob/main/docs/validation.md).
 
-### basic server
-The basic websocket server, `server.js`, can be used with a number of apps provided by Steve Seguin, including vdo.ninja, caption.ninja, chat.overlay.ninja, and more.
+## Choose the matching server and browser option
 
-Due to the simplicity and generic nature of its basic fan-out design, it's really only suitable for personal or private use, as published data is broadcasted to everyone connected.
+| Script | Behavior | VDO.Ninja URL option | Self-hosted page setting |
+|---|---|---|---|
+| `server.js` | Generic fanout: forwards each message to every other connected client. Also usable with compatible caption.ninja and overlay clients. | `wss=` | `session.customWSS = true` |
+| `vdoninja.js` | VDO.Ninja-specific filtered fanout; clients supply `from`, with stream and room filtering. | `wss=` | `session.customWSS = true` |
+| `vdoninja_advanced.js` | Stateful routing: server-assigned peer UUIDs, stream lookup, waiting viewers, room listings and director/migration messages. | **`wss2=`** | **`session.customWSS = false`** |
 
-### VDO.Ninja optimized version server
+Use the advanced server for clients expecting the routed protocol, including the reviewed Flutter app. These are different wire protocols: changing the URL alone cannot make a fanout server speak the advanced protocol. `npm start` still runs **vdoninja.js** for compatibility; use **npm run start:advanced** for advanced routing.
 
-VDO.Ninja is intentionally designed to work with a basic websocket server, due to a core tenant of the VDO.Ninja's design philosophy being: "be as serverless as possible". This develoment mindset allows VDO.Ninja to not only have a low-cost to operate, but also allows it to work over public blockchain networks, mesh-networks, RabbitMQ, IRC chat rooms, and probably even Twitter. It's a good idea to use a secure password in such cases though, to ensure message encryption over public channels.
+The advanced server tracks streams and rooms and routes messages to specific peers. The generic server broadcasts application messages to every other connection; it does not provide private rooms.
 
-That said, it's fairly easy to optimize the message routing to get better performance and security when using VDO.Ninja.  To demonstrate this, I've also included in this repository an optimized version of the websocket server (`vdoninja.js`), specifically designed to fill the role of a VDO.Ninja handshake server. Either the basic or this optimized version would work as a VDO.Ninja handshake server, however the optimized version can handle more clients and has better routing isolation.
+## Install dependencies
 
-### VDO.Ninja advanced routing server
+Use Node.js 22 or newer, preferably a supported LTS release, and npm. Install them using the [Node.js installation guide](https://nodejs.org/en/download) if your distribution provides an older version.
 
-The new `vdoninja_advanced.js` file evolves the optimized server further by adding multi-room awareness, stream ownership tracking, lightweight callback queues, and optional director-style room control. It is the recommended option when you want production-style routing and the behaviour you get when `session.customWSS` is **false** inside VDO.Ninja. In that mode VDO.Ninja expects a stateful handshake service, and the advanced script implements the same message flow as the public hosted infrastructure.
-
-Key notes about the advanced server:
-
-* Licensed under **AGPLv3** — keep that in mind if you distribute modified versions.
-* Supports HTTPS out of the box via `SERVER_CERT`/`SERVER_KEY` (or `CERT_PATH`/`KEY_PATH`) environment variables; falls back to HTTP if no certificate is found. You can also override the listen port with `PORT`.
-* Requires the additional `uuid` dependency (`npm install uuid`).
-* Works with the default VDO.Ninja experience (`customWSS=false`), including director rooms, migration, and stream notifications.
-
-The optimized `vdoninja.js` and generic `server.js` continue to shine when `session.customWSS` is **true**. That keeps the handshake nearly stateless, making it easier to plug into third-party messaging layers like IRC, MQTT, or blockchain relays.
-
-### Offline use, when Internet isn't available
-
-There's a version of VDO.Ninja handshake server located here, https://github.com/steveseguin/offline_deployment/, which combines the websocket (handshake) server with a Node.js-based webserver. It adds to the complexity by also focusing on being Dockerfile friendly, as well as being offline-focused, however it would work for an online option also.
-
-### Dockers
-
-This repository isn't focused on offering a Docker specifically, however https://github.com/steveseguin/offline_deployment/ contains one, as well as there is a community Docker for VDO.Ninja forked over at https://github.com/steveseguin/docker-vdon/.
-
-### Alternative options
-
-You can use services like piesocket.com or Cloudflare workers, instead of self-hosting a websocket server as well. Just pointing that out, as self-hosting servers is a responsibility..
-
-## Installation
-```
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install nodejs -y
-sudo apt-get install npm -y
-sudo npm install express
-sudo npm install ws
-sudo npm install cors
-sudo npm install uuid
+```sh
+git clone https://github.com/steveseguin/websocket_server.git
+cd websocket_server
+npm ci
 ```
 
-You will very likely also require SSL, so either use something like Cloudflare SSL, or grab a self-hosted SSL certificate. WebRTC clients generally refuse to publish or play media over insecure `ws://` endpoints, so plan for TLS (`wss://`) from day one. Certbot is a free way to get SSL certificates that you need to renewal every 90-days, and the setup for that is as follows:
-```
-sudo add-apt-repository ppa:certbot/certbot  
-sudo apt-get install certbot -y
-sudo certbot certonly // register your domain
-```
-If you are starting from a clean server, the standalone mode is usually the fastest path:
-```
+Run npm as the account that owns this checkout, without `sudo`. The advanced server uses Node's built-in `crypto.randomUUID()`; no separate `uuid` installation is needed.
+
+`install_vdoninja_wss.sh` is an older **Debian/Ubuntu system setup helper**, not an unattended deployment recipe. It upgrades OS packages, installs distribution Node/npm and Certbot, changes the invoking user's Vim settings and starts interactive certificate enrollment. It now stops on command errors and installs dependencies from its own directory. Read it before running it and check the installed Node version afterward. The manual steps here are the preferred path.
+
+## Certificates: public host or private LAN
+
+Every connecting device must trust the certificate used by the **WSS endpoint**, and that certificate must cover its exact hostname or IP address. A website certificate does not automatically cover a separate handshake host. Install the public root on clients when using a private CA; keep private keys on the server.
+
+For private LAN/IP-only use, follow the [offline certificate guide](https://github.com/steveseguin/offline_deployment/blob/main/docs/certificates.md). You do not need Docker, a public domain or Caddy for that setup. Browser trust and native-app trust can differ; see the [Android candidate results and limitations](https://github.com/steveseguin/offline_deployment/blob/main/docs/flutter-handoff.md).
+
+For an internet-accessible hostname, follow [Certbot's instructions for your system](https://certbot.eff.org/instructions). With Certbot installed, standalone HTTP validation typically starts with:
+
+```sh
 sudo certbot certonly --standalone -d wss.example.com
 ```
-Certbot will drop the certificate and private key in `/etc/letsencrypt/live/wss.example.com/`. Point the legacy scripts at those paths and set `SERVER_CERT`/`SERVER_KEY` (or `CERT_PATH`/`KEY_PATH`) when launching `vdoninja_advanced.js`. Certbot also installs a systemd timer that renews the certificate automatically; just make sure TCP 80/443 are reachable during renewal.
 
-As well, you will probably need a domain name in most cases, so perhaps consider a cloud host that offers a server hostname or be prepared to spend a few dollars on a domain name. (namescheap.com has them for as low as $2)
+The hostname must resolve to your server and inbound TCP 80 must be reachable and available for this validation method. DNS validation is an alternative. Verify renewal with `sudo certbot renew --dry-run` and check your installation's timer or cron job. The Node scripts read certificates only at startup, so arrange a service restart after successful renewal. See [Certbot's renewal documentation](https://eff-certbot.readthedocs.io/en/stable/using.html#renewing-certificates).
 
-In the case of an offline deployment, you may need self-signed certicates, but that topic is outside the scope of this guide.
+Certificate files often live under `/etc/letsencrypt/live/DOMAIN/`, but a regular service account may not be able to read them. Arrange restricted access or a securely maintained copy for that account; do not make the private key world-readable.
 
-(Oh, also, I've added support for `npm install`, if you want a quick way to install the vdoninja.js script that way.)
+## Start the advanced server with TLS
 
-## To run the basic server manually
-```
-sudo nodejs server.js // port 443 needs to be open. THIS STARTS THE SERVER
-```
-But you'll probably want to create a service and have the script auto start on system load or restart on a crash.
+From this repository, set paths to your existing certificate and key:
 
-## If using with VDO.Ninja
-
-To run the VDO.Ninja optimized version manually,
-```
-sudo nodejs vdoninja.js // port 443 needs to be open. THIS STARTS THE SERVER
-```
-Whether you use the optimized version or not, if using this with a self-hosted version of VDO.Ninja, you'll need to update the `index.html` of your VDO.Ninja installation with the WSS connection details.
-
-Specially, you'll need to enable the `customWSS` mode and set the wss server address to whatever you setup, such as with:
-```
-session.wss = "wss://wss.contribute.cam:443";
-session.customWSS = true;
-```
-You can also just specify the new WSS URL as a URL parameter, such as:
-```
-https://vdo.ninja?wss=wss://yourdomain.com
+```sh
+export CERT_PATH=/absolute/path/to/fullchain.pem
+export KEY_PATH=/absolute/path/to/privkey.pem
+export PORT=8443
+npm run start:advanced
 ```
 
-### Index.html tweaks worth considering when self-hosting
+Use `wss://wss.example.com:8443` from clients. Port 8443 avoids requiring root just to bind a low port. Allow its TCP port through the relevant firewall. The advanced server returns a short text response to HTTPS requests; it does not serve the VDO.Ninja UI.
 
-* **Handshake selection** – leave `session.customWSS` as `false` if you are running `vdoninja_advanced.js`, or set it to `true` when using the simpler `vdoninja.js`/`server.js` so that the client treats your server as stateless.
-* **Password prompts** – `session.defaultPassword`, `session.password`, and the commented `prompt("Enter your password")` snippet in `index.html` provide simple protection layers. For stronger guarantees consider HTTP Basic Auth or Cloudflare Zero Trust as described in the inline comments.
-* **Hide landing page** – setting `session.hidehome = true` or using the `&hidehome` URL parameter removes the home UI for guests. There is also a commented one-liner that blanks the page unless a query string is present.
-* **TURN credentials** – the sample blocks in `index.html` show how to hard-code TURN servers or fetch dynamic credentials via `turn-credentials.php`. Remember to clear `session.ws` only after credentials load if you go that route.
+| Configuration | Advanced server | Basic / filtered fanout servers |
+|---|---|---|
+| Certificate | `SERVER_CERT`, otherwise `CERT_PATH` | `CERT_PATH` |
+| Private key | `SERVER_KEY`, otherwise `KEY_PATH` | `KEY_PATH` |
+| Port | `PORT`; default 443 with TLS, 80 with HTTP fallback | `PORT`; default 443 |
+| No explicit certificate paths | HTTP fallback | Legacy hard-coded certificate paths; edit them or set the environment variables |
+| Invalid TLS files | Logs the error and falls back to HTTP | Startup fails |
 
-These in-page snippets are already present in the upstream `index.html`; you just need to uncomment or edit them to suit your deployment.
+**Existing fallback behavior:** the advanced server uses HTTP if either certificate path is missing or reading/using the pair fails. If `PORT` is set, the fallback uses that same port. A listening message alone does not prove TLS is working: check the startup error output and verify the HTTPS endpoint without bypassing certificate validation before connecting clients. The [offline_deployment server](https://github.com/steveseguin/offline_deployment/blob/main/server.js) instead stops when TLS setup fails.
 
-### Running as a systemd service
+Client-facing connections should use WSS. An HTTPS VDO.Ninja page cannot generally connect to insecure `ws://` signaling. If using a reverse proxy for TLS, configure its WebSocket upgrade support and protect any unencrypted backend from direct client access. This guide does not require a proxy.
 
-For unattended operation you can wrap any of the scripts with systemd. Example for the advanced server (adjust paths to match your deployment):
+To run a legacy variant with the same `CERT_PATH`, `KEY_PATH` and `PORT` exports:
 
+```sh
+npm start
+# Or, for generic fanout:
+npm run start:basic
 ```
+
+Run one script per port. The historical default certificate locations remain in the two legacy scripts for existing installations.
+
+## Connect VDO.Ninja
+
+For the **advanced routing** server, use matching publisher/viewer links:
+
+```text
+https://vdo.ninja/?push=example&wss2=wss.example.com:8443
+https://vdo.ninja/?view=example&wss2=wss.example.com:8443
+```
+
+For `vdoninja.js` or `server.js`, use **`wss=` instead of `wss2=`**. Keep the same server, stream ID, password and salt at both ends. If the clients use a room, use the matching room settings as well.
+
+For a self-hosted website, configure its existing settings directly:
+
+```js
+session.wss = "wss://wss.example.com:8443";
+session.customWSS = false; // advanced routing; true for the fanout variants
+session.salt = "vdo.ninja"; // use the same salt on all clients
+```
+
+You do not need `customWSS = true` when selecting the advanced server with `wss2=`. The native Flutter app's handshake field takes **`wss://HOST:PORT`**, without a `wss2` query parameter; `wss2` belongs in browser links. Native app builds differ in certificate handling and link generation; use the [recorded app guidance](https://github.com/steveseguin/offline_deployment#7-connect-the-native-app).
+
+The public `vdo.ninja` links above require internet access to load the website. For offline operation use the local website address from [offline_deployment](https://github.com/steveseguin/offline_deployment), including in shared viewer links.
+
+## Signaling, media and offline operation
+
+A successful WSS connection proves only the signaling path. Audio/video still needs a working direct connection or TURN relay. This repository does not install STUN/TURN, modify the website's ICE configuration, or guarantee media traversal through a VPN/firewall.
+
+The prepared offline website deliberately keeps `session.configuration = {};`, disabling automatic public STUN/TURN configuration. Leave that offline default intact. For optional internet assistance, use the documented [hybrid browser URL options](https://github.com/steveseguin/offline_deployment#optional-hybrid-use-with-internet-access). The native app has separate TURN behavior: an empty field can still fetch public TURN servers.
+
+A private CA accepted by a browser may still be rejected by a native app. Likewise, media that works with public STUN/TURN is not proof that it will work when the internet is disconnected. The offline guide records those distinctions and the remaining USB/iOS/disconnected-LAN checks. Its [Docker path](https://github.com/steveseguin/offline_deployment/blob/main/docs/docker.md) is optional.
+
+## Optional systemd service
+
+First prove the manual WSS connection. Create or select a regular service account that can read the checkout and certificate/key files. Substitute the account, paths and absolute Node executable in this example; it uses port 8443 and does not require a privileged-port capability.
+
+```ini
 [Unit]
-Description=VDO.Ninja Advanced WebSocket
-After=network.target
+Description=VDO.Ninja advanced WebSocket signaling
+Wants=network-online.target
+After=network-online.target
 
 [Service]
-User=vdoninja
-Group=vdoninja
-Environment=SERVER_CERT=/etc/letsencrypt/live/wss.example.com/fullchain.pem
-Environment=SERVER_KEY=/etc/letsencrypt/live/wss.example.com/privkey.pem
-WorkingDirectory=/opt/websocket_server
-ExecStart=/usr/bin/node /opt/websocket_server/vdoninja_advanced.js
+User=YOUR_USER
+WorkingDirectory=/absolute/path/to/websocket_server
+Environment=CERT_PATH=/absolute/path/to/fullchain.pem
+Environment=KEY_PATH=/absolute/path/to/privkey.pem
+Environment=PORT=8443
+ExecStart=/absolute/path/to/node /absolute/path/to/websocket_server/vdoninja_advanced.js
 Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Save that to `/etc/systemd/system/vdoninja-advanced.service`, run `sudo systemctl daemon-reload`, then enable and start it with:
-```
+Save the edited unit as `/etc/systemd/system/vdoninja-advanced.service`, stop the manual server, then run:
+
+```sh
+sudo systemctl daemon-reload
 sudo systemctl enable --now vdoninja-advanced.service
-sudo systemctl status vdoninja-advanced.service
+sudo systemctl status vdoninja-advanced.service --no-pager
+journalctl -u vdoninja-advanced.service -n 50 --no-pager
 ```
-Duplicate the unit with a different `ExecStart` if you want to run the basic or optimized server instead.
 
-## Disclaimer
+Verify TLS again after startup and renewal. If using the advanced script, HTTP fallback can leave the service marked active even though WSS is unavailable. The [offline maintenance guide](https://github.com/steveseguin/offline_deployment/blob/main/docs/maintenance.md) covers its separate, HTTPS-only deployment template.
 
-No guarentee is made on security, privacy, support, or reliability of these scripts; nor anything else for that matter. You're on your own if you choose to go this path. The code is DIY / AS-IS, and any terms of service are those imposed by the respective open-source licenses (AGPLv3 for the advanced server, and AGPLv3 for the legacy scripts unless otherwise noted). I am not responsible for outages or misconfiguration issues that arise from self-deployment, and I do not offer free support for deployments you manage yourself.
+## Checks and limits
 
-Good luck!
+```sh
+npm test
+```
+
+The automated checks require OpenSSL on PATH and use temporary local certificates and loopback ports. They cover TLS startup, basic fanout, legacy filtering, malformed JSON, advanced identity routing, stream ownership and room listing. Physical media and systemd setup are separate checks; the automated tests do not perform them or install certificates into your OS.
+
+The advanced server allows one stream ID per WebSocket connection. Repeating that ID is allowed; changing it requires a new connection. Its UUID is server-assigned; forwarded advanced messages discard a client-supplied `from` field.
+
+License: [AGPLv3](LICENSE).

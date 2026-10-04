@@ -7,23 +7,7 @@
 //
 // >> Use at your own risk, as it still may contain bugs or security vulnerabilities <<
 //
-///// INSTALLATION
-// sudo apt-get update
-// sudo apt-get upgrade
-// sudo apt-get install nodejs -y
-// sudo apt-get install npm -y
-// sudo npm install express
-// sudo npm install ws
-// sudo npm install cors
-// sudo add-apt-repository ppa:certbot/certbot  
-// sudo apt-get install certbot -y
-// sudo certbot certonly // register your domain
-// sudo nodejs vdoninja.js // port 443 needs to be open. THIS STARTS THE SERVER (or create a service instead)
-//
-//// Finally, within VDO.Ninja, update index.html of the ninja installation as needed, such as with:
-//  session.wss = "wss://wss.contribute.cam:443";
-//  session.customWSS = true;  #  Please refer to the vdo.ninja instructions for exact details on settings; this is just a demo.
-/////////////////////////
+// Setup, TLS paths, ports and matching browser options: see README.md.
 
 "use strict";
 var fs = require("fs");
@@ -33,8 +17,8 @@ var app = express();
 var WebSocket = require("ws");
 var cors = require('cors');
 
-const key = fs.readFileSync("/etc/letsencrypt/live/debug.vdo.ninja/privkey.pem"); /// UPDATE THIS PATH
-const cert = fs.readFileSync("/etc/letsencrypt/live/debug.vdo.ninja/fullchain.pem"); /// UPDATE THIS PATH
+const key = fs.readFileSync(process.env.KEY_PATH || "/etc/letsencrypt/live/debug.vdo.ninja/privkey.pem");
+const cert = fs.readFileSync(process.env.CERT_PATH || "/etc/letsencrypt/live/debug.vdo.ninja/fullchain.pem");
 
 var server = https.createServer({ key, cert }, app);
 var websocketServer = new WebSocket.Server({ server });
@@ -52,7 +36,7 @@ websocketServer.on('connection', (webSocketClient) => {
       return;
     }
 
-    if (!msg.from) return;
+    if (!msg || typeof msg !== 'object' || Array.isArray(msg) || !msg.from) return;
 
     if (!webSocketClient.uuid) {
       let alreadyExists = Array.from(websocketServer.clients).some(client => client.uuid && client.uuid === msg.from && client != webSocketClient);
@@ -104,4 +88,5 @@ websocketServer.on('connection', (webSocketClient) => {
 
   webSocketClient.on('close', function(reasonCode, description) {});
 });
-server.listen(443, () => { console.log(`Server started on port 443`) });
+const port = Number(process.env.PORT) || 443;
+server.listen(port, () => { console.log(`Server started on port ${port}`) });

@@ -1,0 +1,8 @@
+node_modules/
+.test-output/
+*.key
+*.key.*
+*.pem
+*.crt
+certs/
+.env

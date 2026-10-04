@@ -6,12 +6,12 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "uuid": "^14.0.0",
     "ws": "^8.2.3"
   },
   "scripts": {
     "start": "node vdoninja.js",
     "start:basic": "node server.js",
-    "start:advanced": "node vdoninja_advanced.js"
+    "start:advanced": "node vdoninja_advanced.js",
+    "test": "node --test --test-concurrency=1 test/server.test.js"
   }
 }

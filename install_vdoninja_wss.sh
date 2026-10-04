@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
 
 # Update system packages
 sudo apt-get update
@@ -8,7 +10,6 @@ sudo apt-get upgrade -y
 sudo apt-get install nodejs npm vim -y
 
 # Install certbot
-sudo add-apt-repository ppa:certbot/certbot -y
 sudo apt-get install certbot -y
 
 # Install npm dependencies
