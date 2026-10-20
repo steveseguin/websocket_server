@@ -19,6 +19,9 @@ var server = https.createServer({key,cert}, app);
 var websocketServer = new WebSocket.Server({ server });
 
 websocketServer.on('connection', (webSocketClient) => {
+    webSocketClient.on('error', () => {
+        webSocketClient.terminate();
+    });
     webSocketClient.on('message', (message) => {
             websocketServer.clients.forEach( client => {
                     if (webSocketClient!=client){

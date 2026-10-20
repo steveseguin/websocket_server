@@ -12,6 +12,6 @@
     "start": "node vdoninja.js",
     "start:basic": "node server.js",
     "start:advanced": "node vdoninja_advanced.js",
-    "test": "node --test --test-concurrency=1 test/server.test.js"
+    "test": "node --test --test-concurrency=1 test/server.test.js test/socket-errors.test.js"
   }
 }

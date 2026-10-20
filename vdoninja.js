@@ -28,6 +28,9 @@ app.use(cors({
 }));
 
 websocketServer.on('connection', (webSocketClient) => {
+  webSocketClient.on('error', () => {
+    webSocketClient.terminate();
+  });
   var room = false;
   webSocketClient.on('message', (message) => {
     try {
