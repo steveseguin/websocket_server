@@ -46,6 +46,9 @@ websocketServer.on('connection', (webSocketClient) => {
         return;
       } 
       webSocketClient.uuid = msg.from;
+    } else if (webSocketClient.uuid !== msg.from) {
+      webSocketClient.send(JSON.stringify({ error: "can't change uuid" }));
+      return;
     }
 
     var streamID = false;
@@ -90,3 +93,4 @@ websocketServer.on('connection', (webSocketClient) => {
 });
 const port = Number(process.env.PORT) || 443;
 server.listen(port, () => { console.log(`Server started on port ${port}`) });
+

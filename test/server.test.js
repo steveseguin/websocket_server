@@ -109,6 +109,46 @@ test('legacy server ignores malformed message shapes and retains room filtering'
     assert.deepEqual(outsider.messages, []);
 });
 
+test('legacy sender identities cannot change after registration', async t => {
+    const server = await start(t, 'vdoninja.js');
+    const publisher = await server.peer(), viewer = await server.peer(), other = await server.peer();
+    await publisher.send({ from: 'publisher', request: 'seed', streamID: 'stream' });
+    await viewer.send({ from: 'viewer', request: 'play', streamID: 'stream' });
+    await publisher.next();
+    await other.send({ from: 'other', UUID: 'publisher', message: 'register' });
+    await publisher.next();
+    for (const peer of [publisher, viewer, other]) peer.messages.length = 0;
+
+    await other.send({ from: 'publisher', UUID: 'viewer', description: { type: 'offer', sdp: 'forged' } });
+    await viewer.send({ from: 'viewer', UUID: 'publisher', message: 'barrier' });
+    assert.deepEqual(viewer.messages, [], 'A different connection must not impersonate the publisher');
+    assert.match((await other.next()).error, /uuid/);
+    await publisher.next();
+
+    await other.send({ from: 'unused', request: 'seed', streamID: 'other-stream' });
+    assert.match((await other.next()).error, /uuid/);
+    await viewer.send({ from: 'viewer', request: 'play', streamID: 'other-stream' });
+    await other.send({ from: 'other', UUID: 'publisher', message: 'still registered' });
+    assert.deepEqual(other.messages, [], 'Rejected identity changes must not claim a stream');
+    assert.equal((await publisher.next()).from, 'other');
+
+    await publisher.send({ from: 'publisher', UUID: 'viewer', description: { type: 'offer', sdp: 'valid' } });
+    assert.equal((await viewer.next()).description.sdp, 'valid');
+});
+
+test('legacy rejected duplicate identities can retry with an unused identity', async t => {
+    const server = await start(t, 'vdoninja.js');
+    const publisher = await server.peer();
+    await publisher.send({ from: 'publisher', request: 'seed', streamID: 'stream' });
+    const viewer = await server.peer();
+    await viewer.send({ from: 'publisher', request: 'play', streamID: 'stream' });
+    assert.equal((await viewer.next()).error, 'uuid already in use');
+    await viewer.send({ from: 'viewer', request: 'play', streamID: 'stream' });
+    assert.equal((await publisher.next()).from, 'viewer');
+    await viewer.send({ from: 'viewer', request: 'play', streamID: 'stream' });
+    assert.equal((await publisher.next()).from, 'viewer');
+});
+
 test('advanced server rejects malformed shapes and uses connection-owned sender identities', async t => {
     const server = await start(t, 'vdoninja_advanced.js');
     const publisher = await server.peer(), viewer = await server.peer(), outsider = await server.peer();
@@ -177,3 +217,4 @@ test('advanced HTTPS endpoint presents the configured certificate', async t => {
     assert.equal(await get(ca), 'Secure VDONinja server');
     await assert.rejects(get(undefined), /certificate|self.signed/i);
 });
+
