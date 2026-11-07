@@ -46,6 +46,9 @@ websocketServer.on('connection', (webSocketClient) => {
         return;
       } 
       webSocketClient.uuid = msg.from;
+    } else if (webSocketClient.uuid !== msg.from) {
+      webSocketClient.send(JSON.stringify({ error: "can't change uuid" }));
+      return;
     }
 
     var streamID = false;
