@@ -217,4 +217,3 @@ test('advanced HTTPS endpoint presents the configured certificate', async t => {
     assert.equal(await get(ca), 'Secure VDONinja server');
     await assert.rejects(get(undefined), /certificate|self.signed/i);
 });
-
